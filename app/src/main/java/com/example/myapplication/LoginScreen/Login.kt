@@ -1,6 +1,8 @@
 package com.example.myapplication.LoginScreen
 
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -35,9 +37,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.API.RetrofitClient
+import com.example.myapplication.Model.LoginResponse
 import com.example.myapplication.presentation.common.NewsTextButton
 import com.example.myapplication.ui.theme.MyApplicationTheme
-
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 @Composable
@@ -46,7 +52,7 @@ fun Login(navController: NavController){
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     Column(
-        modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ){
@@ -105,7 +111,9 @@ fun Login(navController: NavController){
             modifier = Modifier.fillMaxWidth(0.8f),
             text = "Войти",
             onClick = {
-            },
+                loginUser(context, username, password, navController)
+
+            }
 
         )
 
@@ -138,6 +146,40 @@ fun Login(navController: NavController){
         }
     }
 }
+fun loginUser(context: Context, username: String, password: String, navController: NavController) {
+    RetrofitClient.instance1.loginUser(username, password)
+        .enqueue(object : Callback<LoginResponse> {
+            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                val loginResponse = response.body()
+                if (loginResponse != null && loginResponse.success == true) {
+
+                    val userId = loginResponse.result?.firstOrNull()?.user_id ?: -1
+                    val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
+                    println(userId)
+                    editor.putInt("user_id", userId)
+                    editor.apply()
+
+                    Toast.makeText(context, loginResponse.message, Toast.LENGTH_SHORT).show()
+                    navController.navigate("HomeScreen")
+
+
+                } else {
+                    Toast.makeText(context, loginResponse?.message ?: "Lỗi đăng nhập", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                Toast.makeText(context, "Lỗi kết nối: " + t.message, Toast.LENGTH_LONG).show()
+                t.printStackTrace()
+            }
+        })
+}
+fun getUserId(context: Context): Int {
+    val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
+    return sharedPreferences.getInt("user_id", -1)  // Trả về -1 nếu không tìm thấy user_id
+}
+
 
 @Preview(showBackground = true)
 @Composable

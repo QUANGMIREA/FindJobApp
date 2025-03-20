@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,7 +35,8 @@ fun JobCategoryCard(title: String, iconResId: Int, count: Int) {
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth(), // Ensures the card takes up the full width available
+            .fillMaxWidth()
+            .height(120.dp), // Ensures the card takes up the full width available
         elevation = 4.dp,
         shape = RoundedCornerShape(12.dp), // Rounded corners for a soft, rectangular look
         backgroundColor = Color.White

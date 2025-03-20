@@ -54,10 +54,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.API.RetrofitClient
+import com.example.myapplication.Model.LoginResponse
 
 import com.example.myapplication.presentation.common.NewsTextButton
 
 import com.example.myapplication.ui.theme.MyApplicationTheme
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 @Composable
@@ -166,8 +171,7 @@ fun Register(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(0.8f),
                 text = "Зарегистрировать",
                 onClick = {
-
-
+                    registerUser(context, fullname, email, username, password, navController)
                 }
             )
 
@@ -181,6 +185,38 @@ fun Register(navController: NavController) {
         }
     }
 }
+
+fun registerUser(context: android.content.Context, fullname: String, email: String, username: String, password : String, navController: NavController) {
+    // Gọi API bằng Retrofit
+    RetrofitClient.instance1.registerUser(fullname, email, username, password)
+        .enqueue(object : Callback<LoginResponse> {
+            override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+                val loginResponse = response.body()
+                if (loginResponse != null && loginResponse.success == true) {
+                    // val userId: Int = loginResponse.user_id ?: -1  // Nếu user_id là null, sẽ gán -1
+                    // Lấy user_id từ phản hồi API
+
+                    // Lưu user_id vào SharedPreferences
+
+                    //   val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
+                    //val editor = sharedPreferences.edit()
+                    // editor.putInt("user_id", userId)
+                    //editor.apply()
+                    navController.navigate("HomeScreen")
+                } else {
+                    // Đăng ki thất bại
+                    Toast.makeText(context, loginResponse?.message , Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
+                Toast.makeText(context, "Lỗi kết nối: " + t.message, Toast.LENGTH_LONG).show()
+                t.printStackTrace()
+            }
+        })
+}
+
+
 @Composable
 fun MultiColorText() {
     Text(

@@ -53,8 +53,8 @@ fun OnBoardingScreen(navController: NavController){
         val buttonState = remember {
             derivedStateOf{
                 when(pagerState.currentPage){
-                    0,1,2-> listOf("Продолжать")
-                    3-> listOf("Начать")
+                    0,1-> listOf("Продолжать")
+                    2-> listOf("Начать")
                     else -> listOf("")
                 }
             }
@@ -112,7 +112,7 @@ fun OnBoardingScreen(navController: NavController){
                 text = buttonState.value[0],
                 onClick = {
                     scope.launch {
-                        if(pagerState.currentPage ==4){
+                        if(pagerState.currentPage ==2){
                             navController.navigate("Login")
                         }else{
                             pagerState.animateScrollToPage(page = pagerState.currentPage +1)
